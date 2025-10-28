@@ -4,7 +4,7 @@
 # ║ Project        : tenebrio-16S                                     ║
 # ║ Author         : Sergio Alías-Segura                              ║
 # ║ Created        : 2025-10-08                                       ║
-# ║ Last Modified  : 2025-10-08                                       ║
+# ║ Last Modified  : 2025-10-28                                       ║
 # ║ Contact        : salias[at]ucm[dot]es                             ║
 # ╚═══════════════════════════════════════════════════════════════════╝
 
@@ -78,9 +78,9 @@ comparisons <- lapply(setdiff(unique(metadata$Mycotoxin), "Control"), function(x
 
 ## Alpha boxplots
 
-shannon_pos_stat <- 3.7
+shannon_pos_stat <- 3.4 # 3.7
 shannon_pos_stat_paired <- c(3.4, 3.3, 3.5)
-simpson_pos_stat <- 0.91
+simpson_pos_stat <- 0.83 # 0.91
 simpson_pos_stat_paired <- c(0.84, 0.82, 0.86)
 chao1_pos_stat <- 115
 chao1_pos_stat_paired <- c(106.5, 104, 109)
@@ -98,10 +98,12 @@ shannon <- metadata %>%
   theme(legend.position = "none") +
   scale_shape_manual(values = alpha_shapes, name = "Mycotoxin") +
   ylab("Shannon") +
-  stat_compare_means(label.y = shannon_pos_stat) +
-  stat_compare_means(aes(label = after_stat(paste0('p = ', p.format, '\n', p.signif))),
-                     comparisons = comparisons,
-                     label.y = shannon_pos_stat_paired)
+  scale_x_discrete(labels = c("AFB1" = expression(AFB[1]),
+                              "FB1" = expression(FB[1]))) +
+  stat_compare_means(label.y = shannon_pos_stat) #+
+  #stat_compare_means(aes(label = after_stat(paste0('p = ', p.format, '\n', p.signif))),
+                     # comparisons = comparisons,
+                     # label.y = shannon_pos_stat_paired)
 
 pdf(file.path(outdir, "shannon.pdf"))
 
@@ -122,10 +124,12 @@ simpson <- metadata %>%
   theme(legend.position = "none") +
   scale_shape_manual(values = alpha_shapes, name = "Mycotoxin") +
   ylab("Inverse Simpson") +
-  stat_compare_means(label.y = simpson_pos_stat) +
-  stat_compare_means(aes(label = after_stat(paste0('p = ', p.format, '\n', p.signif))),
-                     comparisons = comparisons,
-                     label.y = simpson_pos_stat_paired)
+  scale_x_discrete(labels = c("AFB1" = expression(AFB[1]),
+                              "FB1" = expression(FB[1]))) +
+  stat_compare_means(label.y = simpson_pos_stat) # +
+  # stat_compare_means(aes(label = after_stat(paste0('p = ', p.format, '\n', p.signif))),
+                     # comparisons = comparisons,
+                     # label.y = simpson_pos_stat_paired)
 
 pdf(file.path(outdir, "simpson.pdf"))
 
@@ -146,6 +150,8 @@ chao1 <- metadata %>%
   theme(legend.position = "none") +
   scale_shape_manual(values = alpha_shapes, name = "Mycotoxin") +
   ylab("Chao1") +
+  scale_x_discrete(labels = c("AFB1" = expression(AFB[1]),
+                              "FB1" = expression(FB[1]))) +
   stat_compare_means(label.y = chao1_pos_stat) +
   stat_compare_means(aes(label = after_stat(paste0('p = ', p.format, '\n', p.signif))),
                      comparisons = comparisons,
@@ -159,15 +165,28 @@ dev.off()
 
 ### Grouped plot
 
+p_alpha <- (chao1 + theme(legend.position="none") +
+            shannon + theme(legend.position="none") +
+            simpson + theme(legend.position="none") +
+            plot_layout(axis_titles = "collect") )
+
+
 pdf(file.path(outdir, "alpha_patched.pdf"),
     width = 10,
     height = 6)
 
-(chao1 + theme(legend.position="none") +
-    shannon + theme(legend.position="none") +
-    simpson + theme(legend.position="none") +
-    #theme(plot.tag.position = "topleft")) +
-  plot_layout(axis_titles = "collect") )#+
-  #plot_annotation(tag_levels = 'A')
+p_alpha
+
+
+dev.off()
+
+png(file.path(outdir, "alpha_patched.png"),
+    width = 10,
+    height = 6,
+    units = "in",
+    res = 300)
+
+p_alpha
+
 
 dev.off()
