@@ -4,7 +4,7 @@
 # ║ Project        : tenebrio-16S                                     ║
 # ║ Author         : Sergio Alías-Segura                              ║
 # ║ Created        : 2025-10-08                                       ║
-# ║ Last Modified  : 2025-10-22                                       ║
+# ║ Last Modified  : 2025-10-28                                       ║
 # ║ Contact        : salias[at]ucm[dot]es                             ║
 # ╚═══════════════════════════════════════════════════════════════════╝
 
@@ -151,6 +151,16 @@ scale_fill_manual(values = beta_colors, name = "Mycotoxin") +
 pdf(file.path(outdir, "pcoa_bray_curtis.pdf"),
     height = 5,
     width = 7)
+
+p_b
+
+dev.off()
+
+png(file.path(outdir, "pcoa_bray_curtis.png"),
+    height = 5,
+    width = 7,
+    units = "in",
+    res = 300)
 
 p_b
 
