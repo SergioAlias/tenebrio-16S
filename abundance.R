@@ -4,7 +4,7 @@
 # ║ Project        : tenebrio-16S                                     ║
 # ║ Author         : Sergio Alías-Segura                              ║
 # ║ Created        : 2025-10-08                                       ║
-# ║ Last Modified  : 2025-10-13                                       ║
+# ║ Last Modified  : 2025-10-28                                       ║
 # ║ Contact        : salias[at]ucm[dot]es                             ║
 # ╚═══════════════════════════════════════════════════════════════════╝
 
@@ -227,16 +227,26 @@ dev.off()
 
 ### Grouped plots
 
+p_v <- (v_AFB1_vs_CON +
+        v_DON_vs_CON +
+        v_FB1_vs_CON +
+        theme(plot.tag.position = "topleft")) +
+        plot_layout(axis_titles = "collect")
+
 pdf(file.path(outdir, "patched_volcano.pdf"),
     width = 15,
     height = 8)
 
-(v_AFB1_vs_CON +
-    v_DON_vs_CON +
-    v_FB1_vs_CON +
-    theme(plot.tag.position = "topleft")) +
-  plot_layout(axis_titles = "collect") # + # ,
-# guides = "collect") +
-# plot_annotation(tag_levels = 'A')
+p_v
+
+dev.off()
+
+png(file.path(outdir, "patched_volcano.png"),
+    width = 15,
+    height = 8,
+    units = "in",
+    res = 300)
+
+p_v
 
 dev.off()
