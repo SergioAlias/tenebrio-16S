@@ -4,7 +4,7 @@
 # ║ Project        : tenebrio-16S                                     ║
 # ║ Author         : Sergio Alías-Segura                              ║
 # ║ Created        : 2025-10-08                                       ║
-# ║ Last Modified  : 2025-10-28                                       ║
+# ║ Last Modified  : 2026-01-20                                       ║
 # ║ Contact        : salias[at]ucm[dot]es                             ║
 # ╚═══════════════════════════════════════════════════════════════════╝
 
@@ -34,6 +34,7 @@ volcanoFromAncombc <- function(qza_path,
                                down_shape,
                                up_legend,
                                down_legend,
+                               legend_dict = NULL,
                                ...,
                                lab_col = NA,
                                log2fc_cutoff = 2,
@@ -87,6 +88,31 @@ volcanoFromAncombc <- function(qza_path,
     theme(legend.title=element_blank(),
           legend.position="top")
   
+  if (!is.null(legend_dict)) {
+    mapper_fun <- function(breaks) {
+      lapply(breaks, function(b) {
+        if (b %in% names(legend_dict)) return(legend_dict[[b]])
+        else return(b)
+      })
+    }
+    
+    legend_order <- c(down_legend, up_legend, ns_legend)
+    
+    v_plot <- v_plot + 
+      scale_color_manual(values = keyvals_col,
+                         labels = mapper_fun,
+                         breaks = legend_order) +
+      scale_shape_manual(values = keyvals_shape,
+                         labels = mapper_fun,
+                         breaks = legend_order)
+  }
+  v_plot <- v_plot +
+    guides(color = guide_legend("Combined Legend", override.aes = list(alpha=1)),
+           shape = guide_legend("Combined Legend")) +
+    theme_classic() +
+    theme(legend.title = element_blank(),
+          legend.position = "top")
+  
   return(v_plot)
 }
 
@@ -123,13 +149,23 @@ taxonomy <- read_qza(taxonomy_file_path)$data
 
 taxonomy %<>% parse_taxonomy() %>% rownames_to_column("id")
 
+## List for using subindices in plot legends
+
+subindex_list <- list(
+  "DA (Control)" = "DA (Control)",
+  "DA (AFB1)" = bquote("DA (" *AFB[1]* ")"),
+  "DA (FB1)" = bquote("DA (" *FB[1]* ")"),
+  "DA (DON)" = "DA (DON)",
+  "NS" = "NS"
+)
+
 
 ## Volcano plots
 
 ### AFB1 vs CON
 
 v_AFB1_vs_CON <- volcanoFromAncombc(qza_path = treatment_con_file_path,
-                                    lab_col = "labnames",
+                                    lab_col = "labnames", # NA for removing labels
                                     log2fc_col = paste0("Mycotoxin", afl_tag, "_lfc"),
                                     pval_col = paste0("Mycotoxin", afl_tag, "_q_val"),
                                     up_color = da_colors[["AFB1"]],
@@ -137,7 +173,8 @@ v_AFB1_vs_CON <- volcanoFromAncombc(qza_path = treatment_con_file_path,
                                     up_shape = da_shapes[["AFB1"]],
                                     down_shape = da_shapes[["Control"]],
                                     up_legend = "DA (AFB1)",
-                                    down_legend = "DA (CON)",
+                                    down_legend = "DA (Control)",
+                                    legend_dict = subindex_list,
                                     colAlpha = 1,
                                     ylab = bquote(~Log[10]~ "Q-value"),
                                     title = NULL,
@@ -162,7 +199,7 @@ dev.off()
 ### DON vs CON
 
 v_DON_vs_CON <- volcanoFromAncombc(qza_path = treatment_con_file_path,
-                                    lab_col = "labnames",
+                                    lab_col = "labnames", # NA for removing labels
                                     log2fc_col = paste0("Mycotoxin", don_tag, "_lfc"),
                                     pval_col = paste0("Mycotoxin", don_tag, "_q_val"),
                                     up_color = da_colors[["DON"]],
@@ -170,7 +207,8 @@ v_DON_vs_CON <- volcanoFromAncombc(qza_path = treatment_con_file_path,
                                     up_shape = da_shapes[["DON"]],
                                     down_shape = da_shapes[["Control"]],
                                     up_legend = "DA (DON)",
-                                    down_legend = "DA (CON)",
+                                    down_legend = "DA (Control)",
+                                    legend_dict = subindex_list,
                                     colAlpha = 1,
                                     ylab = bquote(~Log[10]~ "Q-value"),
                                     title = NULL,
@@ -195,7 +233,7 @@ dev.off()
 ### FB1 vs CON
 
 v_FB1_vs_CON <- volcanoFromAncombc(qza_path = treatment_con_file_path,
-                                   lab_col = "labnames",
+                                   lab_col = "labnames", # NA for removing labels
                                    log2fc_col = paste0("Mycotoxin", fum_tag, "_lfc"),
                                    pval_col = paste0("Mycotoxin", fum_tag, "_q_val"),
                                    up_color = da_colors[["FB1"]],
@@ -203,7 +241,8 @@ v_FB1_vs_CON <- volcanoFromAncombc(qza_path = treatment_con_file_path,
                                    up_shape = da_shapes[["FB1"]],
                                    down_shape = da_shapes[["Control"]],
                                    up_legend = "DA (FB1)",
-                                   down_legend = "DA (CON)",
+                                   down_legend = "DA (Control)",
+                                   legend_dict = subindex_list,
                                    colAlpha = 1,
                                    ylab = bquote(~Log[10]~ "Q-value"),
                                    title = NULL,
